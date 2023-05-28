@@ -1,5 +1,5 @@
 enum NetworkEnums {
-  login('login'),
+  login('auth/login'),
   introOff('introOff'),
   allRestaurent('restaurent'),
   token('token');

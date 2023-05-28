@@ -1,4 +1,4 @@
-enum AuthStatus { unknown, authenticated, guest }
+enum AuthStatus { unknown, authenticated, guest  ,checking}
 
 enum AuthError {
   hostUnreachable,

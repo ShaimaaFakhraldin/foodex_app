@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foodex_app/features/auth/bloc/bloc/auth_bloc.dart';
 import 'package:foodex_app/features/auth/screens/signup_screen.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:provider/provider.dart';
 
+import '../../../core/constants/enums/auth_enums.dart';
 import '../../../global/app_color.dart';
 import '../../../global/app_text_style.dart';
+import '../../../screens/overview_screen.dart';
 import '../../../widgets/action_button.dart';
 import '../../intro/on_boarding_2.dart';
+import '../bloc/bloc/auth_bloc.dart';
 import '../bloc/bloc/auth_bloc.dart';
 
 
@@ -20,8 +27,9 @@ import '../bloc/bloc/auth_bloc.dart';
  }
 
  class _SignInScreenState extends State<SignInScreen> {
-
-  final _formKey = GlobalKey<FormState>();
+   late final AuthBloc authBloc;
+   late StreamSubscription authStream;
+   final _formKey = GlobalKey<FormState>();
    bool _passwordObscure = true;
   bool _passwordConfirm = true;
   bool _keepSignedIn = false;
@@ -40,6 +48,20 @@ import '../bloc/bloc/auth_bloc.dart';
     super.dispose();
   }
 
+  @override
+  void initState() {
+    authBloc = context.read<AuthBloc>()..add(AppStarted());
+    super.initState();
+    authStream = authBloc.stream.listen((state) {
+      if (state.status == AuthStatus.authenticated) {
+        if(mounted) {
+            Navigator.of(context)
+                .pushReplacementNamed(OverViewScreenScreen.routeName);
+
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -250,21 +272,40 @@ import '../bloc/bloc/auth_bloc.dart';
                 height: 12.h,
                 child: Column(
                   children: [
-                    _isLoading
-                        ? const CircularProgressIndicator(
-                      color: greenColor1,
-                      strokeWidth: 2.0,
-                    )
-                        : ActionButton(
-                        height: 4.5.h,
-                        width:  30.w  ,
-                        onTap: (){
-                          context.read<AuthBloc>().add(LoginRequested(
-                            userAuth["userEmail"]!, userAuth["userPassword"]!,
-                          ));
-                        },
-                        text:  "Login"
-                             ),
+                  BlocConsumer<AuthBloc, AuthState>(
+                listener: (context, state) {
+                  if (state.status==AuthStatus.authenticated) {
+                    final data = state.error;
+                    if (data != null) {
+                     } else {
+                     }
+                  }
+                  if (state.status==AuthStatus.unknown && state.error != null) {
+                    var snackBar = SnackBar(content: Text('${state.error}'));
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
+                },
+                builder: (context, state) {
+                  print(state.status);
+                  if (state.status==AuthStatus.checking) {
+                    return const Center(
+                      child: CircularProgressIndicator.adaptive(),
+                    );
+                  }
+
+                  return ActionButton(
+                      height: 4.5.h,
+                      width:  30.w  ,
+                      onTap: (){
+                        context.read<AuthBloc>().add(LoginRequested(
+                          userAuth["userEmail"]!, userAuth["userPassword"]!,
+                        ));
+                      },
+                      text:  "Login"
+                  );
+                },
+                ),
+
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).pushNamed(SignUpscreen.routeName);

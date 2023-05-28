@@ -1,59 +1,64 @@
+import 'dart:convert';
 import 'dart:io';
 
 import '../../../../core/constants/enums/network_enums.dart';
+import '../../../../core/init/network/dio_manager.dart';
 import '../model/auth_model.dart';
-import 'i_auth_service.dart';
 
-class AuthService extends IAuthService {
-  AuthService(super.dioManager);
+class AuthService  {
+  final DioManager dioManager;
+  AuthService(this.dioManager);
 
-  @override
-  Future<AuthModel> login({
+   Future<AuthModel> login({
     required String email,
     required String password,
   }) async {
+ var row = {
+   "email": email,
+   "password": password,
+ };
+ var  body  = {
+
+     "username": 'kminchelle',
+     "password": '0lelplR',
+     // expiresInMins: 60, // optional
+   };
     var response = await dioManager.dio.post(
       NetworkEnums.login.path,
-      data:  {
-        "email": email,
-        "password": password,
-      },
+      data:jsonEncode(body)  ,
     );
 
-    if (response.statusCode == 200) {
+    print("url ${response.requestOptions.uri}");
+    print("resone");
+    print(response);
+    print(response.statusCode );
+    if (response.statusCode! >= 200) {
+      print("888888");
       return AuthModel.fromJson(response.data);
     } else {
-      return throw Exception();
+      return AuthModel(id: 0, username: "", email: "", firstName: "", lastName: "", gender: "", image: "", token: "") ;
     }
   }
 
-  @override
-  Future<bool> isFirstEntry() async {
+   Future<bool> isFirstEntry() async {
     return true;
   }
 
-  @override
-  Future<bool> isLoggedIn() async {
+   Future<bool> isLoggedIn() async {
     return false;
   }
 
-  @override
-  Future<void> signOut() async {}
+   Future<void> signOut() async {}
 
-  @override
-  Future<void> updateFirstEntry() async {}
+   Future<void> updateFirstEntry() async {}
 
-  @override
-  Future<void> updateLoggedIn(bool isLoggedIn) async {}
+   Future<void> updateLoggedIn(bool isLoggedIn) async {}
 
-  @override
-  Future<void> updateToken(String? token) async {}
+   Future<void> updateToken(String? token) async {}
 
-  @override
-  Future<void> updateTokenFromStorage() async {}
+   Future<void> updateTokenFromStorage() async {}
 
-  @override
-  Future<AuthModel> signUp(
+   Future<AuthModel> signUp(
       {required String email, required String password}) async {
     var response = await dioManager.dio.post(
       NetworkEnums.login.path,

@@ -20,15 +20,18 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen>with TickerProviderStateMixin {
-  late final AuthBloc authBloc;
-  late StreamSubscription authStream;
   late AnimationController _controller;
   late Animation<double> _animation;
 
   @override
+  void dispose() {
+     _controller.dispose();
+     super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
-    authBloc = context.read<AuthBloc>()..add(AppStarted());
 
     /// For [animation]
     _controller = AnimationController(
@@ -36,20 +39,6 @@ class _SplashScreenState extends State<SplashScreen>with TickerProviderStateMixi
       duration: const Duration(seconds: 2),
     )..repeat();
     _animation = Tween(begin: 0.0, end: 1.0).animate(_controller);
-
-    authStream = authBloc.stream.listen((state) {
-      if (state.status == AuthStatus.authenticated) {
-        Future.delayed(const Duration(seconds: 2)).then(
-              (_) => Navigator.of(context)
-                  .pushReplacementNamed(OverViewScreenScreen.routeName),
-        );
-      } else {
-        Future.delayed(const Duration(seconds: 2)).then(
-              (_) => Navigator.of(context)
-                  .pushReplacementNamed(SignInScreen.routeName),
-        );
-      }
-    });
     timer();
   }
 

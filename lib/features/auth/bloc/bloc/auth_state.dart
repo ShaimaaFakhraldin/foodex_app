@@ -14,11 +14,16 @@ class AuthState {
 
   const AuthState.unknown() : this._();
 
+  const AuthState.checking()
+      : this._(
+          status: AuthStatus.checking,
+          isFirstEntry: false,
+        );
   const AuthState.authenticated()
       : this._(
           status: AuthStatus.authenticated,
           isFirstEntry: false,
-        );
+  );
 
   const AuthState.guest()
       : this._(
