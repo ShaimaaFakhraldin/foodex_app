@@ -9,6 +9,7 @@ import '../model/auth_model.dart';
 import '../service/auth_service.dart';
 
 part 'auth_event.dart';
+
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -36,30 +37,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LoginRequested>(
       (event, emit) async {
         emit(const AuthState.checking());
-       try {
+        try {
           final AuthModel response = await authService.login(
               email: event.email, password: event.password);
-          // emit(const AuthState.authenticated());
-          print("hhhhhhhhhhhhhhhhh 1");
           if (response.token.isNotEmpty) {
             log(response.token);
-            print("hhhhhhhhhhhhhhhhh 2");
             await authService.updateToken(response.token);
             await authService.updateLoggedIn(true);
             emit(const AuthState.authenticated());
           } else {
-            print("hhhhhhhhhhhhhhhhh");
             emit(const AuthState.error(error: AuthError.wrongEmailOrPassword));
           }
-       }on DioError catch (e) {
-         emit(const AuthState.error(error: AuthError.unknown));
-         if(e.response!.statusCode == 404){
-        print(e.response!.statusCode);
-        }else{
-        print(e.message);
-        print(e.requestOptions.uri);
+        } on DioError catch (e) {
+          emit(const AuthState.error(error: AuthError.unknown));
+          if (e.response!.statusCode == 404) {
+            print(e.response!.statusCode);
+          } else {
+            print(e.message);
+            print(e.requestOptions.uri);
+          }
         }
-      }
       },
     );
 
